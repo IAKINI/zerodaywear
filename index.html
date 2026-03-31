@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZeroDayWear | OS v2.9.2-RESISTANCE</title>
+    <title>ZeroDayWear | OS v2.9.4-RESISTANCE</title>
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; margin: 0; overflow: hidden; font-size: 18px; }
         
@@ -76,7 +76,7 @@
 <canvas id="matrix-canvas"></canvas>
 
 <div id="boot-screen">
-    <div id="boot-history">ZeroDayWear_OS [Boot_v2.9.1]...
+    <div id="boot-history">ZeroDayWear_OS [Boot_v2.9.4]...
 [  <span style="color:#fff;">OK</span>  ] Checking internal memory...
 [  <span style="color:#fff;">OK</span>  ] Loading ZeroDay_Kernel...
 [  <span style="color:#fff;">OK</span>  ] Initialize network stack...
@@ -104,7 +104,7 @@ Loading dükkan interface...<span id="boot-cursor"></span></div>
 </div>
 
 <div id="terminal">
-    <div id="history">ZeroDay_OS [Version 2.9.2-RESISTANCE]
+    <div id="history">ZeroDay_OS [Version 2.9.4-RESISTANCE]
 (c) 2026 ZeroDayWear Cyber-Collective.
 
 [!] SYSTEM_MESSAGE: New data detected in root directory.
@@ -216,7 +216,6 @@ Type 'ls' to list files or 'help' for available commands.</div>
     }
     renderLeaderboard();
 
-    // --- ACTIVE OPERATIVES COUNTER ---
     function updateOnlineCount() {
         const counterEl = document.getElementById('online-count');
         let currentCount = parseInt(counterEl.innerText);
@@ -274,10 +273,16 @@ hears their cry for freedom.
 <span style="color: #fff;">"Behind every product is a heartbeat of resistance."</span>
 --------------------------------------------------`;
 
-    const baseCommands = ['help', 'ls', 'info', 'buy', 'clear', 'cd', 'cat', 'status'];
-    
-    // --- SHAKA DEĞİŞKENİ ---
+    const baseCommands = ['help', 'ls', 'info', 'buy', 'clear', 'cd', 'cat', 'status', 'whoami'];
     let waitingForDestruction = false;
+
+    // --- NEW WHOAMI STORIES ---
+    const whoamiStories = [
+        "Hello... I am Fatima from Tehran. The regime cut the internet; I haven't been able to speak with my family for 9 days. Maybe with your support, we can secretly set up a Starlink dish. Maybe I can tell them I'm alive... Thank you.",
+        "Hi, I am Ali from Isfahan. I watched them shoot my brothers in the streets. Now I can't get my voice out. Every bit of support can save one more voice from the darkness. Please don't forget us.",
+        "Hello, my name is Sara. While being tortured in detention, only one thing was on my mind: 'Will those outside hear?' A t-shirt you buy might carry my voice to the world. Maybe I'll survive.",
+        "I am Mehdi from Kerman. The regime found and took our Starlink dish. Now we are in the dark again. Your support could mean a new dish. This is my only hope to tell my family 'I am living'."
+    ];
 
     input.addEventListener('keydown', function(e) {
         if (waitingForDestruction) {
@@ -296,7 +301,7 @@ hears their cry for freedom.
         if (e.key === 'Tab') {
             e.preventDefault();
             const val = input.value.trim().toLowerCase();
-            const allSuggestions = [...baseCommands, ...Object.keys(filesystem), ...Object.keys(products), 'manifesto.txt', 'privacy.txt', 'afterpayment.txt', '.hidden.txt'];
+            const allSuggestions = [...baseCommands, 'manifesto.txt', 'privacy.txt', 'afterpayment.txt', '.hidden.txt'];
             const match = allSuggestions.find(s => s.startsWith(val.split(' ').pop()));
             if (match) {
                 const parts = val.split(' ');
@@ -326,7 +331,11 @@ hears their cry for freedom.
 
             switch(cmd) {
                 case 'help':
-                    history.innerHTML += `Commands: ls, ls -a, cd [dir], cat [file], info [item], buy [item], status, clear\n`;
+                    history.innerHTML += `Commands: ls, ls -a, cd [dir], cat [file], info [item], buy [item], status, whoami, clear\n`;
+                    break;
+                case 'whoami':
+                    const randomStory = whoamiStories[Math.floor(Math.random() * whoamiStories.length)];
+                    history.innerHTML += `\n<span class="highlight">[ INCOMING_ENCRYPTED_MESSAGE ]</span>\n"${randomStory}"\n`;
                     break;
                 case 'ls':
                     if (fullVal === 'ls -a') {
@@ -338,7 +347,7 @@ hears their cry for freedom.
                     }
                     break;
                 case 'status':
-                    history.innerHTML += `\n<span class="highlight">[ SYSTEM_OPERATIONAL_STATUS ]</span>\n--------------------------------------------------\n> TOTAL_FUNDS_RAISED : <span style="color:#fff;">$5,420.00 USD</span>\n> PAYMENTS_PROCESSED : <span style="color:#fff;">164 Units</span>\n> BYPASS_SUCCESS_RATE: <span style="color:#fff;">94.2%</span>\n> CURRENT_TARGET     : <span class="highlight">PROJECT_PERSIAN_SHIELD</span>\n--------------------------------------------------\n<span style="color:#0f0;">[OK]</span> Satellite links stable.\n<span style="color:#0f0;">[OK]</span> Encryption: AES-256-GCM active.\n`;
+                    history.innerHTML += `\n<span class="highlight">[ SYSTEM_OPERATIONAL_STATUS ]</span>\n--------------------------------------------------\n> TOTAL_FUNDS_RAISED : <span style="color:#fff;">$5,420.00 USD</span>\n> PAYMENTS_PROCESSED : <span style="color:#fff;">164 Units</span>\n> CURRENT_TARGET     : <span class="highlight">PROJECT_PERSIAN_SHIELD</span>\n--------------------------------------------------\n<span style="color:#0f0;">[OK]</span> Satellite links stable.\n<span style="color:#0f0;">[OK]</span> Encryption: AES-256-GCM active.\n`;
                     break;
                 case 'cat':
                     if (arg === 'manifesto.txt') {
