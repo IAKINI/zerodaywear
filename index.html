@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroDayWear | Deployment Terminal</title>
+    <style>
+        body { background-color: #000; margin: 0; overflow: hidden; }
+        #terminal {
+            width: 100vw; height: 100vh; color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px; box-sizing: border-box; font-size: 18px;
+            overflow-y: auto; position: relative;
+        }
+        #history { white-space: pre-wrap; line-height: 1.4; margin-bottom: 10px; }
+        .input-line { display: flex; align-items: center; }
+        .prompt { color: #0f0; margin-right: 10px; font-weight: bold; }
+        #cmd {
+            background: transparent; border: none; color: #0f0;
+            font-family: inherit; font-size: inherit; outline: none; flex: 1;
+        }
+        /* CRT Tarama Çizgisi Efekti */
+        #terminal::after {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="terminal">
+    <div id="history">ZeroDay_OS v2.6.0-STABLE (c) 2026 TR_HUB
+Type 'help' to begin infiltration...</div>
+    <div class="input-line">
+        <span class="prompt">guest@zerodaywear:~$</span>
+        <input type="text" id="cmd" autofocus autocomplete="off" spellcheck="false">
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('cmd');
+    const history = document.getElementById('history');
+    const terminal = document.getElementById('terminal');
+
+    const products = {
+        'payload-v1.0': {
+            name: 'PAYLOAD v1.0: INFILTRATE & SECURE',
+            price: '$20.68',
+            paymentLink: 'https://nowpayments.io/payment/YOUR_LINK_HERE' // Buraya NOWPayments linkini koy kanka
+        }
+    };
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const val = input.value.trim();
+            const [cmd, arg] = val.split(' ');
+            
+            history.innerHTML += `\n<span style="color:#008800">guest@zerodaywear:~$ ${val}</span>\n`;
+            
+            if (cmd === 'ls') {
+                history.innerHTML += `[FILE] payload-v1.0\n[DIR] about\n`;
+            } else if (cmd === 'help') {
+                history.innerHTML += `Commands: ls, info <item>, buy <item>, clear, help\n`;
+            } else if (cmd === 'info' && arg === 'payload-v1.0') {
+                history.innerHTML += `PRODUCT: ${products[arg].name}\nPRICE: ${products[arg].price}\nDESC: Heavy cotton, oversized fit, encrypted graphics.\n`;
+            } else if (cmd === 'buy' && products[arg]) {
+                history.innerHTML += `<span style="color:#f2a900">[!] REDIRECTING TO SECURE CRYPTO NODE...</span>\n`;
+                setTimeout(() => { window.location.href = products[arg].paymentLink; }, 2000);
+            } else if (cmd === 'clear') {
+                history.innerHTML = '';
+            } else {
+                history.innerHTML += `Command '${cmd}' not found.\n`;
+            }
+            
+            input.value = '';
+            terminal.scrollTo(0, terminal.scrollHeight);
+        }
+    });
+
+    // Sayfaya tıklayınca inputa odaklan
+    document.addEventListener('click', () => input.focus());
+</script>
+</body>
+</html>
