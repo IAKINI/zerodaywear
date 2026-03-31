@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroDayWear | OS v2.7</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; margin: 0; overflow: hidden; font-size: 18px; }
+        #terminal { width: 100vw; height: 100vh; padding: 20px; box-sizing: border-box; overflow-y: auto; position: relative; z-index: 1; }
+        #history { white-space: pre-wrap; line-height: 1.5; margin-bottom: 10px; }
+        .input-line { display: flex; align-items: center; }
+        #cmd { background: transparent; border: none; color: #0f0; font-family: inherit; font-size: inherit; outline: none; flex: 1; caret-color: #0f0; }
+        .prompt { font-weight: bold; margin-right: 10px; color: #0f0; }
+        #visual-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        #visual-box { border: 2px solid #0f0; padding: 15px; background: #000; text-align: center; box-shadow: 0 0 30px #0f0; max-width: 450px; }
+        #visual-box img { max-width: 100%; height: auto; border: 1px solid #050; margin-bottom: 15px; }
+        #visual-box p { margin: 5px 0; color: #0f0; font-size: 16px; }
+        .close-hint { font-size: 10px; color: #666; margin-top: 10px; text-transform: uppercase; }
+    </style>
+</head>
+<body onclick="document.getElementById('cmd').focus()">
+
+<div id="terminal">
+    <div id="history">ZeroDay_OS [Version 2.7.0-STABLE]
+(c) 2026 ZeroDayWear. Operative Access Granted.
+Type 'help' for infiltration manual.</div>
+    <div class="input-line">
+        <span class="prompt" id="current-prompt">guest@zerodaywear:~$</span>
+        <input type="text" id="cmd" autofocus autocomplete="off" spellcheck="false">
+    </div>
+</div>
+
+<div id="visual-overlay" onclick="this.style.display='none'; document.getElementById('cmd').focus();">
+    <div id="visual-box">
+        <div style="color:#0f0; font-size: 12px; margin-bottom: 10px;">[ VISUAL_DECRYPTION_SUCCESSFUL ]</div>
+        <img id="target-img" src="" alt="Loading...">
+        <p id="target-name" style="font-weight:bold;"></p>
+        <p id="target-price" style="color:#fff;"></p>
+        <p id="target-desc"></p>
+        <div class="close-hint">Click anywhere to terminate view</div>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('cmd');
+    const history = document.getElementById('history');
+    const terminal = document.getElementById('terminal');
+    const promptSpan = document.getElementById('current-prompt');
+    const overlay = document.getElementById('visual-overlay');
+
+    let currentDir = 'root'; // root, tshirts, hoodies, about
+
+    const filesystem = {
+        'root': ['tshirts/', 'hoodies/', 'about/'],
+        'tshirts': ['infiltrate-v1', 'null-pointer'],
+        'hoodies': ['dark-node-v2'],
+        'about': ['mission.txt', 'privacy.txt']
+    };
+
+    const products = {
+        'infiltrate-v1': { name: 'PAYLOAD: INFILTRATE & SECURE', price: '$20.68', img: 'infiltrate-secure.jpg', desc: 'Heavy cotton, oversized fit. Anti-tracking graphics.' }
+    };
+
+    const baseCommands = ['help', 'ls', 'info', 'buy', 'clear', 'cd'];
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const val = input.value.trim().toLowerCase();
+            if (!val) return;
+            const parts = val.split(' ');
+            const currentInput = parts[parts.length - 1];
+            
+            const allSuggestions = [...baseCommands, ...Object.keys(filesystem), ...Object.keys(products)];
+            const match = allSuggestions.find(s => s.startsWith(currentInput));
+            if (match) {
+                parts[parts.length - 1] = match;
+                input.value = parts.join(' ');
+            }
+        }
+
+        if (e.key === 'Enter') {
+            const fullVal = input.value.trim();
+            if (!fullVal) return;
+            const parts = fullVal.split(' ');
+            const cmd = parts[0].toLowerCase();
+            const arg = parts[1] ? parts[1].replace('/', '') : null;
+
+            history.innerHTML += `\n<span style="color:#555">${promptSpan.innerText} ${fullVal}</span>\n`;
+
+            switch(cmd) {
+                case 'help':
+                    history.innerHTML += `Commands: ls, cd [dir], info [item], buy [item], clear\nNavigation: cd .. to return\n`;
+                    break;
+                case 'ls':
+                    let list = arg ? filesystem[arg] : filesystem[currentDir];
+                    if (list) {
+                        history.innerHTML += list.join('   ') + '\n';
+                    } else {
+                        history.innerHTML += `ls: directory not found\n`;
+                    }
+                    break;
+                case 'cd':
+                    if (!arg || arg === 'root' || arg === '~') {
+                        currentDir = 'root';
+                        promptSpan.innerText = `guest@zerodaywear:~$`;
+                    } else if (arg === '..') {
+                        currentDir = 'root';
+                        promptSpan.innerText = `guest@zerodaywear:~$`;
+                    } else if (filesystem[arg]) {
+                        currentDir = arg;
+                        promptSpan.innerText = `guest@zerodaywear:~/${arg}$`;
+                    } else {
+                        history.innerHTML += `cd: no such directory: ${arg}\n`;
+                    }
+                    break;
+                case 'info':
+                    if (products[arg]) {
+                        document.getElementById('target-img').src = products[arg].img;
+                        document.getElementById('target-name').innerText = products[arg].name;
+                        document.getElementById('target-price').innerText = `Price: ${products[arg].price}`;
+                        document.getElementById('target-desc').innerText = products[arg].desc;
+                        overlay.style.display = 'flex';
+                    } else {
+                        history.innerHTML += `Error: Data for '${arg}' is encrypted or missing.\n`;
+                    }
+                    break;
+                case 'buy':
+                    if (products[arg]) {
+                        history.innerHTML += `<span style="color:#f2a900">[!] ROUTING TO SECURE CRYPTO NODE...</span>\n`;
+                        setTimeout(() => { window.location.href = "https://nowpayments.io/payment/YOUR_LINK"; }, 1500);
+                    } else {
+                        history.innerHTML += `Error: Deployment target '${arg}' not found.\n`;
+                    }
+                    break;
+                case 'clear':
+                    history.innerHTML = 'ZeroDay_OS Terminal [Ready]';
+                    break;
+                default:
+                    history.innerHTML += `Command '${cmd}' unknown.\n`;
+            }
+            input.value = '';
+            terminal.scrollTo(0, terminal.scrollHeight);
+        }
+    });
+</script>
+</body>
+</html>
