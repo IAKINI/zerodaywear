@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroDayWear | OS v2.9.1-GLOBAL</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; margin: 0; overflow: hidden; font-size: 18px; }
+        
+        /* --- MATRIX CANVAS STYLE --- */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            opacity: 0.15;
+            filter: blur(1px);
+        }
+
+        #terminal { 
+            width: 100vw; 
+            height: 100vh; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            overflow-y: auto; 
+            position: relative; 
+            z-index: 1;
+            display: none;
+        }
+
+        /* --- GLITCH EFFECT ANIMATION --- */
+        @keyframes glitch {
+            0% { transform: translate(0); text-shadow: none; }
+            2% { transform: translate(-5px, 2px); text-shadow: 2px 0 #f00, -2px 0 #00f; }
+            4% { transform: translate(5px, -2px); text-shadow: -2px 0 #f00, 2px 0 #00f; }
+            6% { transform: translate(0); text-shadow: none; }
+            100% { transform: translate(0); }
+        }
+
+        .glitch-active {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
+            color: #fff !important; /* Glitch anında beyaz parlama */
+        }
+
+        #history { white-space: pre-wrap; line-height: 1.5; margin-bottom: 10px; padding-right: 270px; }
+        .input-line { display: flex; align-items: center; padding-right: 270px; }
+        #cmd { background: transparent; border: none; color: #0f0; font-family: inherit; font-size: inherit; outline: none; flex: 1; caret-color: #0f0; }
+        .prompt { font-weight: bold; margin-right: 10px; color: #0f0; }
+        
+        /* --- LEADERBOARD & LIVE FEED --- */
+        #side-panel {
+            position: fixed; top: 20px; right: 20px; width: 240px; z-index: 10; display: none;
+        }
+
+        #live-feed {
+            border: 1px solid #f00; padding: 10px; background: rgba(20, 0, 0, 0.8);
+            font-size: 12px; margin-bottom: 10px; color: #ff4444; text-transform: uppercase;
+        }
+
+        #leaderboard { 
+            border: 1px dashed #0f0; 
+            padding: 15px; background: rgba(0, 10, 0, 0.9); font-size: 14px; 
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1); 
+        }
+
+        .lb-title { color: #f2a900; font-weight: bold; text-align: center; margin-bottom: 12px; border-bottom: 1px solid #0f0; padding-bottom: 5px; }
+        .lb-row { display: flex; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid #010; }
+        .lb-rank { color: #555; width: 25px; }
+        .lb-name { flex: 1; color: #0f0; overflow: hidden; text-overflow: ellipsis; }
+        .lb-units { color: #fff; font-weight: bold; }
+
+        #visual-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        #visual-box { border: 2px solid #0f0; padding: 15px; background: #000; text-align: center; box-shadow: 0 0 30px #0f0; max-width: 450px; }
+        #visual-box img { max-width: 100%; height: auto; border: 1px solid #050; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
+        #visual-box p { margin: 5px 0; color: #0f0; font-size: 16px; }
+        .close-hint { font-size: 10px; color: #666; margin-top: 10px; text-transform: uppercase; cursor: pointer; }
+        .highlight { color: #f2a900; }
+        .danger { color: #ff0000; font-weight: bold; }
+        
+        #terminal::after { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 2; }
+
+        @media (max-width: 768px) { #side-panel { display: none !important; } #history, .input-line { padding-right: 0; } }
+
+        /* --- BOOT SCREEN --- */
+        #boot-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; color: #0f0; z-index: 200; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body onclick="document.getElementById('cmd').focus()">
+
+<canvas id="matrix-canvas"></canvas>
+
+<div id="boot-screen">
+    <div id="boot-history">ZeroDayWear_OS [Boot_v2.9.1]...
+[  <span style="color:#fff;">OK</span>  ] Loading ZeroDay_Kernel...
+[  <span style="color:#f00;">!!</span>  ] Detected unauthorized proxy node.
+[  <span style="color:#fff;">OK</span>  ] Bypassing regime firewall...
+[ <span class="highlight">LOAD</span> ] Establishing secure tunnel... 100%
+[  <span style="color:#fff;">OK</span>  ] Decrypting main interface...</div>
+</div>
+
+<div id="side-panel">
+    <div id="live-feed">
+        <span id="blink-dot" style="color:red;">●</span> LIVE_STATS<br>
+        NODES: <span id="active-nodes">--</span> ACTIVE<br>
+        SGNL: ENCRYPTED
+    </div>
+    <div id="leaderboard">
+        <div class="lb-title">[ TOP_OPERATIVES ]</div>
+        <div id="lb-content"></div>
+    </div>
+</div>
+
+<div id="terminal">
+    <div id="history">ZeroDay_OS [Version 2.9.1-STABLE]
+(c) 2026 ZeroDayWear Cyber-Collective.
+
+[!] STATUS: Operation 'Persian Shield' is ACTIVE.
+Type 'ls' to list files or 'help' for available commands.</div>
+    <div class="input-line">
+        <span class="prompt" id="current-prompt">guest@zerodaywear:~$</span>
+        <input type="text" id="cmd" autocomplete="off" spellcheck="false">
+    </div>
+</div>
+
+<div id="visual-overlay" onclick="closeVisual()">
+    <div id="visual-box">
+        <img id="target-img" src="" alt="">
+        <p id="target-name" style="font-weight:bold;"></p>
+        <p id="target-price" style="color:#fff;"></p>
+        <div id="target-desc"></div>
+        <div class="close-hint">Click anywhere to terminate connection</div>
+    </div>
+</div>
+
+<script>
+    // --- ELEMENT REFS ---
+    const input = document.getElementById('cmd');
+    const history = document.getElementById('history');
+    const terminal = document.getElementById('terminal');
+    const bootScreen = document.getElementById('boot-screen');
+    const nodesDisplay = document.getElementById('active-nodes');
+
+    // --- MATRIX LOGIC (Hızlı Geçiyorum) ---
+    const matrixCanvas = document.getElementById('matrix-canvas');
+    const ctx = matrixCanvas.getContext('2d');
+    matrixCanvas.width = window.innerWidth; matrixCanvas.height = window.innerHeight;
+    const characters = '0123456789ABCDEFアァカサタナハマヤ'.split('');
+    const fontSize = 16; const columns = matrixCanvas.width / fontSize; const drops = [];
+    for (let x = 0; x < columns; x++) drops[x] = 1;
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        ctx.fillStyle = '#0f0'; ctx.font = fontSize + 'px Courier New';
+        for (let i = 0; i < drops.length; i++) {
+            const text = characters[Math.floor(Math.random() * characters.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(drawMatrix, 35);
+
+    // --- GLITCH TRIGGER ---
+    function triggerGlitch() {
+        terminal.classList.add('glitch-active');
+        setTimeout(() => {
+            terminal.classList.remove('glitch-active');
+        }, 300);
+    }
+    // Her 20-40 saniyede bir rastgele glitch
+    setInterval(() => {
+        if (Math.random() > 0.7) triggerGlitch();
+    }, 20000);
+
+    // --- LIVE USER COUNTER (Operatives) ---
+    function updateOperatives() {
+        // 14 ile 24 arası rastgele bir "aktif operatif" sayısı
+        const baseCount = 14;
+        const randomCount = baseCount + Math.floor(Math.random() * 11);
+        nodesDisplay.innerText = randomCount;
+    }
+    setInterval(updateOperatives, 8000);
+    updateOperatives();
+
+    // --- TERMINAL LOGIC ---
+    const leaders = [ { name: "Ghost_Node", units: 14 }, { name: "Null_Pointer", units: 11 }, { name: "Persian_Wolf", units: 9 } ];
+    document.getElementById('lb-content').innerHTML = leaders.map((l, i) => `<div class="lb-row"><span>${i+1}. ${l.name}</span><span>${l.units}u</span></div>`).join('');
+
+    const products = {
+        'infiltrate-v1': { name: 'TEE: INFILTRATE', price: '$20.68', img: 'infiltrate-secure.jpeg', desc: 'Tactical Gear.' },
+        'dark-node-v2': { name: 'HOODIE: DARK NODE', price: '$60.00', img: 'black-hoodie.jpg', desc: 'Black Ops Armor.' }
+    };
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const fullVal = input.value.trim();
+            const cmd = fullVal.split(' ')[0].toLowerCase();
+            const arg = fullVal.split(' ')[1];
+            history.innerHTML += `\n<span style="color:#555">guest@zerodaywear:~$ ${fullVal}</span>\n`;
+
+            if (cmd === 'ls') history.innerHTML += `tshirts/  hoodies/  manifesto.txt\n`;
+            else if (cmd === 'info' && products[arg]) showVisual(arg);
+            else if (cmd === 'clear') history.innerHTML = '';
+            else if (cmd === 'status') {
+                triggerGlitch(); // Durum kontrolünde glitch efekti havalı durur
+                history.innerHTML += `> NODES: ONLINE\n> FUND: $5,420\n`;
+            }
+            else history.innerHTML += `Unknown command. Type 'help'.\n`;
+
+            input.value = '';
+            terminal.scrollTo(0, terminal.scrollHeight);
+        }
+    });
+
+    function showVisual(id) {
+        const p = products[id];
+        document.getElementById('target-img').src = p.img;
+        document.getElementById('target-name').innerText = p.name;
+        document.getElementById('visual-overlay').style.display = 'flex';
+    }
+
+    function closeVisual() { document.getElementById('visual-overlay').style.display = 'none'; input.focus(); }
+
+    window.onload = () => {
+        setTimeout(() => {
+            bootScreen.style.display = 'none';
+            terminal.style.display = 'block';
+            document.getElementById('side-panel').style.display = 'block';
+            input.focus();
+        }, 3000);
+    };
+</script>
+</body>
+</html>
