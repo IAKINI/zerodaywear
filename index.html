@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZeroDayWear | OS v2.9.1-GLOBAL</title>
+    <title>ZeroDayWear | OS v2.9.2-RESISTANCE</title>
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; margin: 0; overflow: hidden; font-size: 18px; }
         
@@ -14,9 +14,9 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0; /* Terminalin arkasında kalacak */
-            opacity: 0.15; /* Gözü yormaması için çok hafif transparan */
-            filter: blur(1px); /* Hafif puslu, daha gerçekçi */
+            z-index: 0; 
+            opacity: 0.15; 
+            filter: blur(1px); 
         }
 
         #terminal { 
@@ -26,8 +26,8 @@
             box-sizing: border-box; 
             overflow-y: auto; 
             position: relative; 
-            z-index: 1; /* Matrix'in üzerinde */
-            display: none; /* Başlangıçta gizli */
+            z-index: 1; 
+            display: none; 
         }
         #history { white-space: pre-wrap; line-height: 1.5; margin-bottom: 10px; padding-right: 270px; }
         .input-line { display: flex; align-items: center; padding-right: 270px; }
@@ -64,7 +64,7 @@
 
         @media (max-width: 768px) { #side-panel { display: none !important; } #history, .input-line { padding-right: 0; } }
 
-        /* --- BOOT SEQUENCE STYLE --- */
+        /* --- BOOT SCREEN --- */
         #boot-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; z-index: 200; padding: 30px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; }
         #boot-history { white-space: pre-wrap; line-height: 1.4; font-size: 16px; flex: 1; }
         #boot-cursor { display: inline-block; width: 10px; height: 18px; background: #0f0; animation: blink 0.8s infinite; }
@@ -104,7 +104,7 @@ Loading dükkan interface...<span id="boot-cursor"></span></div>
 </div>
 
 <div id="terminal">
-    <div id="history">ZeroDay_OS [Version 2.9.1-STABLE]
+    <div id="history">ZeroDay_OS [Version 2.9.2-RESISTANCE]
 (c) 2026 ZeroDayWear Cyber-Collective.
 
 [!] SYSTEM_MESSAGE: New data detected in root directory.
@@ -177,7 +177,6 @@ Type 'ls' to list files or 'help' for available commands.</div>
 
     setInterval(drawMatrix, 35);
 
-
     // --- BOOT SEQUENCE LOGIC ---
     const bootLines = [
         "[  <span style='color:#fff;'>OK</span>  ] ZeroDayWear OS loaded.",
@@ -217,16 +216,15 @@ Type 'ls' to list files or 'help' for available commands.</div>
     }
     renderLeaderboard();
 
-    // --- ACTIVE OPERATIVES COUNTER LOGIC ---
+    // --- ACTIVE OPERATIVES COUNTER ---
     function updateOnlineCount() {
         const counterEl = document.getElementById('online-count');
         let currentCount = parseInt(counterEl.innerText);
-        // Rastgele 1 artır veya azalt (min 8, max 40 arası)
         const change = Math.random() > 0.5 ? 1 : -1;
         currentCount = Math.max(8, Math.min(40, currentCount + change));
         counterEl.innerText = currentCount;
     }
-    setInterval(updateOnlineCount, 4000); // Her 4 saniyede bir güncelle
+    setInterval(updateOnlineCount, 4000);
 
     const filesystem = {
         'root': ['tshirts/', 'hoodies/', 'manifesto.txt', 'privacy.txt', 'afterpayment.txt'],
@@ -277,8 +275,24 @@ hears their cry for freedom.
 --------------------------------------------------`;
 
     const baseCommands = ['help', 'ls', 'info', 'buy', 'clear', 'cd', 'cat', 'status'];
+    
+    // --- SHAKA DEĞİŞKENİ ---
+    let waitingForDestruction = false;
 
     input.addEventListener('keydown', function(e) {
+        if (waitingForDestruction) {
+            if (e.key.toLowerCase() === 'y') {
+                history.innerHTML += `<br><span class="danger">DELETING LOGS... ACCESSING THE TRUTH.</span><br>`;
+                setTimeout(() => { window.location.href = "https://www-iranintl-com.translate.goog/en/202601255198?_x_tr_sl=en&_x_tr_tl=tr&_x_tr_hl=tr&_x_tr_pto=tc&_x_tr_hist=true"; }, 1500);
+            } else if (e.key.toLowerCase() === 'n') {
+                waitingForDestruction = false;
+                history.innerHTML += `<br><span style="color:#0f0;">ABORTED. I AM STILL HERE.</span><br>`;
+                input.value = '';
+            }
+            e.preventDefault();
+            return;
+        }
+
         if (e.key === 'Tab') {
             e.preventDefault();
             const val = input.value.trim().toLowerCase();
@@ -294,6 +308,16 @@ hears their cry for freedom.
         if (e.key === 'Enter') {
             const fullVal = input.value.trim();
             if (!fullVal) return;
+
+            // --- RM -RF SHAKA CHECK ---
+            if (fullVal === 'rm -rf /') {
+                history.innerHTML += `\n<span style="color:#555">${promptSpan.innerText} ${fullVal}</span>\n`;
+                history.innerHTML += `<span class="danger" style="font-size: 22px;">ARE YOU TRYING TO GET RID OF ME? (y/n)</span>\n`;
+                waitingForDestruction = true;
+                input.value = '';
+                return;
+            }
+
             const parts = fullVal.split(' ');
             const cmd = parts[0].toLowerCase();
             const arg = parts[1] ? parts[1].replace('/', '') : null;
@@ -390,7 +414,6 @@ hears their cry for freedom.
     }
     
     window.onload = printBootLine;
-
 </script>
 </body>
 </html>
