@@ -226,7 +226,7 @@ Type 'ls' to list files or 'help' for available commands.</div>
     setInterval(updateOnlineCount, 4000);
 
     const filesystem = {
-        'root': ['tshirts/', 'hoodies/', 'manifesto.txt', 'privacy.txt', 'afterpayment.txt'],
+        'root': ['tshirts/', 'hoodies/', 'manifesto.txt', 'donate.txt', 'privacy.txt', 'afterpayment.txt'],
         'tshirts': ['infiltrate-v1', 'null-pointer'],
         'hoodies': ['dark-node-v2'],
         'hidden': ['.hidden.txt']
@@ -276,7 +276,7 @@ hears their cry for freedom.
     const baseCommands = ['help', 'ls', 'info', 'buy', 'clear', 'cd', 'cat', 'status', 'whoami'];
     let waitingForDestruction = false;
 
-    // --- NEW WHOAMI STORIES ---
+    // --- WHOAMI STORIES ---
     const whoamiStories = [
         "Hello... I am Fatima from Tehran. The regime cut the internet; I haven't been able to speak with my family for 9 days. Maybe with your support, we can secretly set up a Starlink dish. Maybe I can tell them I'm alive... Thank you.",
         "Hi, I am Ali from Isfahan. I watched them shoot my brothers in the streets. Now I can't get my voice out. Every bit of support can save one more voice from the darkness. Please don't forget us.",
@@ -301,7 +301,7 @@ hears their cry for freedom.
         if (e.key === 'Tab') {
             e.preventDefault();
             const val = input.value.trim().toLowerCase();
-            const allSuggestions = [...baseCommands, 'manifesto.txt', 'privacy.txt', 'afterpayment.txt', '.hidden.txt'];
+            const allSuggestions = [...baseCommands, 'manifesto.txt', 'donate.txt', 'privacy.txt', 'afterpayment.txt', '.hidden.txt'];
             const match = allSuggestions.find(s => s.startsWith(val.split(' ').pop()));
             if (match) {
                 const parts = val.split(' ');
@@ -314,7 +314,6 @@ hears their cry for freedom.
             const fullVal = input.value.trim();
             if (!fullVal) return;
 
-            // --- RM -RF SHAKA CHECK ---
             if (fullVal === 'rm -rf /') {
                 history.innerHTML += `\n<span style="color:#555">${promptSpan.innerText} ${fullVal}</span>\n`;
                 history.innerHTML += `<span class="danger" style="font-size: 22px;">ARE YOU TRYING TO GET RID OF ME? (y/n)</span>\n`;
@@ -347,11 +346,25 @@ hears their cry for freedom.
                     }
                     break;
                 case 'status':
-                    history.innerHTML += `\n<span class="highlight">[ SYSTEM_OPERATIONAL_STATUS ]</span>\n--------------------------------------------------\n> TOTAL_FUNDS_RAISED : <span style="color:#fff;">$5,420.00 USD</span>\n> PAYMENTS_PROCESSED : <span style="color:#fff;">164 Units</span>\n> CURRENT_TARGET     : <span class="highlight">PROJECT_PERSIAN_SHIELD</span>\n--------------------------------------------------\n<span style="color:#0f0;">[OK]</span> Satellite links stable.\n<span style="color:#0f0;">[OK]</span> Encryption: AES-256-GCM active.\n`;
+                    history.innerHTML += `\n<span class="highlight">[ SYSTEM_OPERATIONAL_STATUS ]</span>\n--------------------------------------------------\n> TOTAL_FUNDS_RAISED : <span style="color:#fff;">$5,420.00 USD</span>\n> PAYMENTS_PROCESSED : <span style="color:#fff;">164 Units</span>\n> CURRENT_TARGET      : <span class="highlight">PROJECT_PERSIAN_SHIELD</span>\n--------------------------------------------------\n<span style="color:#0f0;">[OK]</span> Satellite links stable.\n<span style="color:#0f0;">[OK]</span> Encryption: AES-256-GCM active.\n`;
                     break;
                 case 'cat':
                     if (arg === 'manifesto.txt') {
                         history.innerHTML += `<span class="highlight">--- [ PROJECT: PERSIAN SHIELD ] ---</span>\nZeroDayWear is a digital resistance node. 100% support for Iran.\n`;
+                    } else if (arg === 'donate.txt') {
+                        history.innerHTML += `
+<span class="highlight">--- [ SECURE CONTRIBUTION CHANNEL ] ---</span>
+If you wish to provide more support than a single product purchase, 
+or if you prefer a direct impact without physical delivery, 
+please use our encrypted Bitcoin node. 
+
+<span style="color:#fff;">"Your fuel keeps the resistance alive."</span>
+
+<span class="danger">BTC_ADDRESS:</span> <span style="color:#fff; background:#222; padding:2px 5px; border:1px solid #444;">bc1qtnyug9vcljwcu65w74wspp9fyj0sd5ydwx5eku</span>
+
+[!] 100% of crypto funds are used for Starlink procurement and 
+    VPN bridge maintenance in restricted zones.
+--------------------------------------------------\n`;
                     } else if (arg === 'afterpayment.txt') {
                         history.innerHTML += `**************************************************\nTo finalize, email: <span class="highlight">azurany@proton.me</span>\n**************************************************\n`;
                     } else if (arg === '.hidden.txt' || arg === 'hidden.txt') {
